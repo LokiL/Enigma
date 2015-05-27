@@ -1,11 +1,11 @@
 __author__ = 'Арслан'
 class enigmawheel():
-    def __init__(self, wheel, i, trig): #инициализация вводом [значений], начального поворота, триггера поворота
+    def __init__(self, wheel, i, trigger): #инициализация вводом [значений], начального поворота, триггера поворота
         self.wheelpermutation = wheel
         for k in range(i): #начальный поворот колеса
             self.rotate()
         self.currentposition = 0 #обнуляем начальную позицию
-        self.nextwheeltrigger = (trig-i)%26 #установка триггера на поворот следующего колеса
+        self.nextwheeltrigger = (trigger-i)%26 #установка триггера на поворот следующего колеса
     def rotate(self): #поворот на 1
         t = self.wheelpermutation.pop(0)
         self.wheelpermutation.append(t)
@@ -21,6 +21,13 @@ class enigmawheel():
         for i in range(26):
             if (i+self.wheelpermutation[i])%26 == j:
                 return i
+    def changecurrent(self, l, trigger): #смена текущей позиции
+        for k in range(l): #начальный поворот колеса
+            self.rotate()
+        self.currentposition = 0 #обнуляем начальную позицию
+        self.nextwheeltrigger = (trigger-l)%26 #установка триггера на поворот следующего колеса
+
+
     currentposition = 0 #текущая позиция
     nextwheeltrigger = 0 #триггер поворота следующего колеса
     wheelpermutation = [] #набор шифров
@@ -44,15 +51,96 @@ def getciftext(k): # получение шифротекста
     buff = Rl.getplain(buff)
     buff = Rm.getplain(buff)
     buff = Rr.getplain(buff)
-    #условия поворота колес
-    Rr.rotate()
-    if Rr.currentposition == Rr.nextwheeltrigger:
-        Rm.rotate()
-        if Rm.currentposition == Rm.nextwheeltrigger:
-            Rl.rotate()
+    rotatewheels(1)
     return buff
+
+def rotatewheels(i):#поворот колес i раз
+    for j in range(i):
+        Rr.rotate()
+        if Rr.currentposition == Rr.nextwheeltrigger:
+            Rm.rotate()
+            if Rm.currentposition == Rm.nextwheeltrigger:
+                Rl.rotate()
+    pass
 
 def createcif(text): #кодировка
     for i in range(len(text)):
         text.insert(i, getciftext(i))
     return text
+
+def decodecombinations():
+    decodedpositions = []
+    for i in range(26):
+        for j in range(26):
+            for k in range(26):
+                print('Первоначальный подбор: ', i,j,k)
+                createnullwheels()
+                Rl.changecurrent(i, 0)
+                Rm.changecurrent(j, 16)
+                Rr.changecurrent(k, 22)
+                for letter in range(26):
+                    rotatewheels(6)
+                    buff1 = getciftext(letter)
+                    rotatewheels(3)
+                    buff1 = getciftext(buff1)
+                    if buff1 == letter:
+                        '''
+                        Rl.setdefault()
+                        Rm.setdefault()
+                        Rr.setdefault()
+                        rotatewheels(27)
+
+                        buff2 = getciftext(letter)
+                        rotatewheels(11)
+                        buff2 = getciftext(buff2)
+                        if buff2 == letter:
+                        '''
+                        Rl.setdefault()
+                        Rm.setdefault()
+                        Rr.setdefault()
+                        rotatewheels(1)
+                        buff3 = getciftext(letter)
+                        rotatewheels(42)
+                        buff3 = getciftext(buff3)
+                        Rl.setdefault()
+                        Rm.setdefault()
+                        Rr.setdefault()
+                        rotatewheels(15)
+                        buff3 = getciftext(buff3)
+                        rotatewheels(11)
+                        buff3 = getciftext(buff3)
+                        Rl.setdefault()
+                        Rm.setdefault()
+                        Rr.setdefault()
+                        rotatewheels(10)
+                        buff3 = getciftext(buff3)
+                        Rl.setdefault()
+                        Rm.setdefault()
+                        Rr.setdefault()
+                        rotatewheels(9)
+                        buff3 = getciftext(buff3)
+                        if buff3 == letter:
+                            decodedpositions.append([i,j,k,letter])
+    return decodedpositions
+
+def decode(combinations):
+    lst = []
+    createnullwheels()
+    for i in combinations:
+        print('Вторичный подбор', i)
+        Rl.changecurrent(i[0], 0)
+        Rm.changecurrent(i[1], 16)
+        Rr.changecurrent(i[2], 22)
+        for letter in range(26):
+            rotatewheels(27)
+            buff = getciftext(letter)
+            rotatewheels(11)
+            buff = getciftext(buff)
+            if buff == letter:
+                lst.append([i, letter])
+
+
+
+
+print(decode(decodecombinations()))
+
